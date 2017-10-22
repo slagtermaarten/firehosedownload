@@ -1,0 +1,22 @@
+Package: firehosedownload
+Title: Download data from the Broad's Firehose service
+Version: 0.1.0.3
+Authors@R: person("Maarten", "Slagter", email = "slagter.maarten@gmail.com",
+                  role = c("aut", "cre"))
+Description: This package contains essential functionality for the Foreign Antigen Space project we have been conducting in the Schumacher lab at the Netherlands Cancer Institute. We required mutation lists for a broad range of malignancies and needed to annotate them with RNA expression levels as well as copy number statuses of the genomic loci they are located in. Included is functionality to download and preprocess mutation lists (MAF files), Affymetrix SNP6 and RSEM-RNASeqV2/cufflinks-RNASeqV1 data from the Broad's Institute Firehose and from pre-downloaded ICGC data as well as pre-downloaded CoMMpass-derived Multiple Myeloma data. Using the annotate* functions, mutation lists can be further annotated with extra variables.
+Depends: R (>= 3.0.0), data.table
+License: BSD
+LazyData: true
+Imports: data.table (>= 1.9.6), 
+    dplyr, 
+    settings,
+    dtplyr,
+    doMC, 
+    gdata,
+    parallel, 
+    plyr, 
+    stringr, 
+    XML
+Remotes:
+    slagtermaarten/maartenutils
+Suggests: testthat
