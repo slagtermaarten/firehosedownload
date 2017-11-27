@@ -9,7 +9,6 @@ License: BSD
 LazyData: true
 Imports: data.table (>= 1.9.6), 
     dplyr, 
-    settings,
     dtplyr,
     doMC, 
     gdata,

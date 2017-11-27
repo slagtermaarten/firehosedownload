@@ -3,6 +3,7 @@
 #' @return name of project for which to download SNP6 data
 downloadClinical <- function(project) {
   check_file_structure()
+  connect_firehose()
   dlinks = llinks[grepl(paste('/data/', project, '/', sep = ''), llinks)]
   ddoc = XML::htmlTreeParse(dlinks, useInternalNodes = T)
   if (file.exists(fname)) {
@@ -12,7 +13,7 @@ downloadClinical <- function(project) {
 
   tarfile <- file.path(downloadFolder, paste0(project,  '-clinical.tar.gz'))
   if (!file.exists(tarfile)) {
-    keyWord <- paste0('.Merge_Clinical.Level_1.', fd_options('fh_timestamp'), 
+    keyWord <- paste0('.Merge_Clinical.Level_1.', fh_timestamp, 
                       '00.0.0.tar.gz')
     keyWord <- paste0("//a[contains(@href, '", keyWord, "')]")
     

@@ -4,6 +4,7 @@
 #' @return file.path of downloaded file if download was successful, NULL if not
 downloadMuts <- function(project) {
   check_file_structure()
+  connect_firehose()
   maf.path <- file.path(firehoseFolder, paste0(project,  ".maf"))
   mymessage(project,  sprintf("trying %s", maf.path))
   if (file.exists(maf.path)) {

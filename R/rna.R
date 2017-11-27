@@ -2,10 +2,10 @@
 #'
 #'
 downloadRNA <- function(project, FPKM = F,
-                        l_timestamp = ifelse(project == 'STAD',
-                                           '20151101',
-                                           fd_options('fh_timestamp'))) {
+                        l_timestamp = ifelse(project == 'STAD', '20151101',
+                                             fh_timestamp)) {
   check_file_structure()
+  connect_firehose()
   timestamp_l <- underscore_timestamp(l_timestamp)
 
   if (FPKM) {

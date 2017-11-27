@@ -10,24 +10,60 @@ if (local_run) {
 }
 
 
-## This function is not exported to user space and does not need to be
-## documented.
-MYPKGOPTIONS <- settings::options_manager(root_folder='~/antigenic_space', 
-                                          fh_timestamp='20150821',
-                                          outputAlexandrov = T)
+.onLoad <- function(libname, pkgname) {
+  if (exists('fas.root_path')) {
+    options('fas.root_path' = fas.root_path)
+  } else {
+    options('fas.root_path' = path.expand('~/antigenic_space'))
+  }
 
-#' User function that gets exported:
+  if (exists('fh_timestamp')) {
+    options('fh_timestamp' = fh_timestamp)
+  } else {
+    options('fh_timestamp' = '20150821')
+  }
+
+  if (exists('outputAlexandrov')) {
+    options('outputAlexandrov' = outputAlexandrov)
+  } else {
+    options('outputAlexandrov' = T)
+  }
+  check_file_structure()
+
+  invisible()
+}
+
+
+#' Connect to firehose and download file inventory
 #'
-#' Set or get options for my package
-#' 
-#' @param ... Option names to retrieve option values or \code{[key]=[value]}
-#' pairs to set options.
-#'
-#' @export
-fd_options <- function(...) {
-  # protect against the use of reserved words.
-  stop_if_reserved(...)
-  MYPKGOPTIONS(...)
+#' @param reconnect Force reconnection when inventory is already downloaded
+#' @param fh_timestamp_s Firehose timestamp in short format '[year][month][day]'
+connect_firehose <- function(reconnect = F, fh_timestamp_s = fh_timestamp) {
+  if (!is.null(llinks) && !reconnect) return(invisible())
+
+  timestamp_l <<- underscore_timestamp(fh_timestamp_s)
+
+  ldoc <<- tryCatch(
+    XML::htmlTreeParse(paste0('http://gdac.broadinstitute.org/runs/stddata',
+                       '__', timestamp_l, '/'), useInternalNodes = T),
+    error = function(e) {
+      print('Could not reach Firehose, please check internet connection')
+      return(NULL)
+  })
+
+  if (!is.null(ldoc)) {
+    firehose_datasets <<- XML::xpathSApply(ldoc, 
+                  "//a[contains(@href, 'Standardized+Data+Run+Release+Notes')]",
+                   XML::xmlValue)
+    llinks <<- unlist(XML::xpathApply(ldoc, '//a[@href]', 
+                                     XML::xmlGetAttr,  'href'))
+    ## Datasets for which we can both get MAFs and RNASeq from Firehose
+    data.interest <<- setdiff(firehose_datasets, 
+                              c('COADREAD', 'KIPAN', 'GBMLGG', 'FPPP', 'MESO',
+                                'THYM', 'STES'))
+    data.interest <<- setNames(unlist(data.interest), NULL)
+  }
+  invisible()
 }
 
 
@@ -45,13 +81,15 @@ underscore_timestamp <- function(time_s) {
 
 
 check_file_structure <- function(...) {
-  if (F) {
-    mymessage('check_file_structure', 
-              sprintf('Checking/creating file hierarchy in %s', 
-                      fd_options('root_folder')))
+  root_folder <<- options('fas.root_path')[[1]]
+  fh_timestamp <<- options('fh_timestamp')[[1]]
+  outputAlexandrov <<- options('outputAlexandrov')[[1]]
+  if (!dir.exists(root_folder)) {
+    message('fasanalysis: creating file structure in ', root_folder)
+    dir.create(root_folder, showWarnings = T)
   }
   ## Location for raw data
-  dataFolder <<- file.path(fd_options('root_folder'), 'data-raw')
+  dataFolder <<- file.path(root_folder, 'data-raw')
   ## Location for archived files
   downloadFolder <<- file.path(dataFolder, 'serveronly', 'tars')
   ## Location for human readable files
@@ -72,29 +110,5 @@ check_file_structure <- function(...) {
   dir.create(firehoseFolder, showWarnings = F, recursive = T)
   dir.create(outputFolder, showWarnings = F)
   dir.create(ds_folder, showWarnings = F)
-
-  timestamp_l <<- underscore_timestamp(fd_options('fh_timestamp'))
-
-  ldoc <<- tryCatch(
-    XML::htmlTreeParse(paste0('http://gdac.broadinstitute.org/runs/stddata',
-                       '__', timestamp_l, '/'), useInternalNodes = T),
-    error = function(e) {
-      print('Could not reach Firehose, please check internet connection')
-      return(NULL)
-  })
-
-
-  if (!is.null(ldoc)) {
-    firehose_datasets <<- XML::xpathSApply(ldoc, 
-                  "//a[contains(@href, 'Standardized+Data+Run+Release+Notes')]",
-                   XML::xmlValue)
-    llinks <<- unlist(XML::xpathApply(ldoc, '//a[@href]', 
-                                     XML::xmlGetAttr,  'href'))
-    ## Datasets for which we can both get MAFs and RNASeq from Firehose
-    data.interest <<- setdiff(firehose_datasets, 
-                              c('COADREAD', 'KIPAN', 'GBMLGG', 'FPPP', 'MESO',
-                                'THYM', 'STES'))
-    data.interest <<- setNames(unlist(data.interest), NULL)
-  }
   invisible()
 }

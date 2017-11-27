@@ -176,26 +176,6 @@ genMAFAggregate <- function() {
 genAggregate <- genMAFAggregate
 
 
-#' ggplot theme
-#'
-#' Rather self-explanatory, a ggplot2 theme derived from theme_bw()
-maarten_theme <- function (base_size = 12, base_family = 'Helvetica',
-                           xangle = 90, hjust = 1, vjust = .5)
-{
-    theme_grey(base_size = base_size, base_family = base_family) %+replace%
-      theme(axis.text = element_text(size = rel(0.8)),
-            axis.ticks = element_line(colour = 'black'),
-      axis.text.x = element_text(angle = xangle, hjust = hjust, vjust = vjust),
-      legend.key = element_rect(colour = 'white'),
-      panel.background = element_rect(fill = 'white',  colour = NA),
-      panel.border = element_rect(fill = NA,  colour = 'grey50'),
-      panel.grid.major = element_line(colour = 'grey90',  size = 0.2),
-      panel.grid.minor = element_line(colour = 'grey98',  size = 0.5),
-      strip.background = element_rect(fill = 'grey80',  
-                                      colour = 'grey50', size = 0.2))
-}
-
-
 #' Clear strings of new line characters
 #'
 #' @param string input string to be cleared of new lines
